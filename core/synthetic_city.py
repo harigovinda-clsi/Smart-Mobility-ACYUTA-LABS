@@ -1,4 +1,3 @@
-```python
 """
 Synthetic City
 ===============================================================================
@@ -340,4 +339,3 @@ class SyntheticCity:
             self.compute_average_wait_time()
 
         }
-```
