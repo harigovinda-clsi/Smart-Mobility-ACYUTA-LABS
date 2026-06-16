@@ -41,7 +41,6 @@ import datetime
 import time
 import sys
 import os
-import datetime
 
 # 1. Absolute path alignment
 current_dir = os.path.dirname(os.path.abspath(__file__))
@@ -230,7 +229,7 @@ with col_time:
 # SIMULATE ONE STEP
 # ============================================================================
 
-# Generate synthetic demand for current time
+# 1. Generate synthetic demand for current time
 demand_state = st.session_state.demand_gen.generate_demand(
     time_minutes=time_slider,
     weather_condition=weather,
@@ -238,22 +237,23 @@ demand_state = st.session_state.demand_gen.generate_demand(
     metro_frequency=metro_freq
 )
 
-# Predict collapse risk
+# 2. Get structural snapshot of current fleet distribution
 city_snapshot = st.session_state.city.get_city_snapshot()
 
+# 3. Predict spatial structural collapse risk parameters
 collapse_risk = st.session_state.collapse_predictor.evaluate_network(
     demand_state,
     city_snapshot
 )
 
-# Compute mobility equity
+# 4. Compute decentralized mobility equity indicators
 equity_metrics = st.session_state.equity_engine.evaluate_network(
     demand_state,
     city_snapshot,
     collapse_risk
 )
 
-# Agent decisions
+# 5. Process decentralized multi-agent decision matrices
 agent_actions = st.session_state.agent_controller.evaluate_network(
     demand_state,
     city_snapshot,
@@ -261,10 +261,10 @@ agent_actions = st.session_state.agent_controller.evaluate_network(
     equity_metrics
 )
 
-# Update city state
+# Update city state engine
 st.session_state.city.update_city(demand_state)
 
-# Store in history
+# Store snapshots into tracking data logs for time-series charts
 st.session_state.simulation_history["timestamp"].append(time_slider)
 st.session_state.simulation_history["collapse_risk"].append(collapse_risk["overall"])
 st.session_state.simulation_history["avg_wait"].append(equity_metrics["average_wait_time"])
@@ -398,7 +398,7 @@ with tab3:
     st.subheader("Mobility Equity Index (MEI)")
     st.markdown(
         "MEI = Availability / Demand per zone. Low MEI = underserved zone.  \n"
-        "**Gini coefficient target:** >0.85 (fair distribution)"
+        "**Equity Target Goal:** Over 0.85 indicates healthy baseline fairness system distribution."
     )
     
     fig_equity = render_equity_heatmap(equity_metrics["zone_mei"])
