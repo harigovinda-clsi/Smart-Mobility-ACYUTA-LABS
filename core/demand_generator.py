@@ -30,15 +30,16 @@ class DemandGenerator:
         midday = 2.0 * np.ones(24)
         return midday + morning_peak + evening_peak
     
-    def generate_demand(self, time_minutes=0, weather_condition="Sunny", event_type="None", metro_frequency="Medium"):
-        ```python
+    ```python
+def generate_demand(
+        self,
+        time_minutes=0,
+        weather_condition="Sunny",
+        event_type="None",
+        metro_frequency="Medium"):
 """
-Generate a synthetic snapshot representing the
-current state of urban mobility demand.
-
-The resulting structure serves as the input layer
-for collapse estimation, equity analysis,
-and decentralized intervention.
+Generate a synthetic snapshot representing the current state of urban mobility demand. The resulting structure 
+serves as the input layer for collapse estimation, equity analysis, and decentralized intervention.
 """
 ```
 
