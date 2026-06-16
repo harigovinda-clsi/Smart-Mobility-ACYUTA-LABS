@@ -49,7 +49,13 @@ from core.mobility_equity_engine import MobilityEquityEngine
 from core.multi_agent_controller import MultiAgentController
 from visualization.network_plot import render_network_graph
 from visualization.heatmap_plot import render_equity_heatmap
-from visualization.metrics_panel import MetricsPanel
+from visualization.metrics_panel import (
+    render_metrics_panel,
+    render_system_status,
+    render_event_banner,
+    render_weather_banner,
+    render_time_banner
+)
 
 # ============================================================================
 # PAGE CONFIG
