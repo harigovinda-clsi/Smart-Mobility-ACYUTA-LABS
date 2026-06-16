@@ -9,23 +9,12 @@ The objective of this module is not to reproduce any specific city,
 but to construct a simplified urban environment within which mobility
 patterns, accessibility asymmetries, and interventions can be studied.
 
-The synthetic city contains:
+The synthetic city maintains only resource and accessibility states.
 
-    Metro hubs
+Demand itself is generated externally through the DemandGenerator module.
 
-    Bus corridors
-
-    Residential districts
-
-    Commercial zones
-
-    Peripheral communities
-
-Each zone maintains a local state describing resource availability,
-waiting time, and utilization.
-
-The resulting structure serves as the spatial backbone for the
-OneJourney AI simulation environment.
+This separation reflects the idea that infrastructure and mobility demand
+are distinct but interacting components of urban systems.
 
 ===============================================================================
 """
@@ -51,17 +40,16 @@ class SyntheticCity:
 
         self.initialize_zone_states()
 
-    # ===================================================================
+    # ==================================================================
     # Graph Construction
-    # ===================================================================
+    # ==================================================================
 
     def initialize_graph(self):
         """
-        Construct the underlying connectivity structure.
+        Construct connectivity relationships between zones.
 
-        The topology intentionally combines central hubs with
-        peripheral regions to reproduce accessibility asymmetries
-        frequently observed in urban systems.
+        The topology intentionally combines central hubs and
+        peripheral regions to reproduce accessibility asymmetries.
         """
 
         for zone in range(self.num_zones):
@@ -102,23 +90,24 @@ class SyntheticCity:
             transit_edges
         )
 
-    # ===================================================================
+    # ==================================================================
     # Zone Initialization
-    # ===================================================================
+    # ==================================================================
 
     def initialize_zone_states(self):
         """
-        Initialize mobility resources and local characteristics.
+        Initialize resource availability and accessibility
+        characteristics associated with each zone.
 
-        Peripheral zones intentionally begin with fewer resources
-        to emulate structural imbalances often observed in practice.
+        Peripheral regions intentionally begin with fewer
+        mobility resources.
         """
 
         for zone in range(self.num_zones):
 
             if zone in [8,9,11]:
 
-                scooter_count = np.random.randint(
+                availability = np.random.randint(
 
                     15,
                     30
@@ -126,7 +115,7 @@ class SyntheticCity:
 
             else:
 
-                scooter_count = np.random.randint(
+                availability = np.random.randint(
 
                     40,
                     90
@@ -134,9 +123,9 @@ class SyntheticCity:
 
             self.zone_states[zone] = {
 
-                "scooters":
+                "availability":
 
-                scooter_count,
+                availability,
 
                 "waiting_time":
 
@@ -150,7 +139,7 @@ class SyntheticCity:
 
                 np.random.uniform(
 
-                    0.40,
+                    0.4,
                     0.75
                 ),
 
@@ -160,33 +149,37 @@ class SyntheticCity:
 
             }
 
-    # ===================================================================
+    # ==================================================================
     # State Update
-    # ===================================================================
+    # ==================================================================
 
     def update_zone_state(
             self,
-            zone_id,
-            demand_intensity):
+            zone_demand):
         """
-        Update local state in response to changing demand.
+        Update local conditions in response to
+        evolving demand.
 
-        Higher demand increases waiting time and utilization
-        while reducing available resources.
+        Demand is supplied externally through
+        the DemandGenerator.
         """
+
+        zone_id = zone_demand.zone_id
+
+        intensity = zone_demand.intensity
 
         zone = self.zone_states[zone_id]
 
-        scooters = zone["scooters"]
+        availability = zone["availability"]
 
-        scooters -= int(
+        availability -= int(
 
-            demand_intensity
+            intensity
         )
 
-        scooters = max(
+        availability = max(
 
-            scooters,
+            availability,
             0
         )
 
@@ -194,13 +187,15 @@ class SyntheticCity:
 
             1.0,
 
-            demand_intensity / 10
+            intensity / 10
         )
 
         waiting_time = (
 
             3
+
             +
+
             12 * utilization
         )
 
@@ -218,9 +213,9 @@ class SyntheticCity:
 
         self.zone_states[zone_id] = {
 
-            "scooters":
+            "availability":
 
-            scooters,
+            availability,
 
             "waiting_time":
 
@@ -233,18 +228,35 @@ class SyntheticCity:
             "status":
 
             status
+
         }
 
-    # ===================================================================
-    # Fleet Statistics
-    # ===================================================================
+    # ==================================================================
+    # Batch Update
+    # ==================================================================
+
+    def update_city(
+            self,
+            demand_state):
+        """
+        Update all zones using the current demand snapshot.
+        """
+
+        for zone_demand in demand_state["zones"]:
+
+            self.update_zone_state(
+
+                zone_demand
+            )
+
+    # ==================================================================
+    # Fleet Utilization
+    # ==================================================================
 
     def compute_fleet_utilization(self):
         """
-        Aggregate local behavior into a city-level indicator.
-
-        Utilization represents the fraction of resources actively
-        participating in mobility flows.
+        Aggregate local utilization into
+        a city-level indicator.
         """
 
         utilizations = [
@@ -268,9 +280,9 @@ class SyntheticCity:
             * 100
         )
 
-    # ===================================================================
-    # Waiting Time
-    # ===================================================================
+    # ==================================================================
+    # Average Waiting Time
+    # ==================================================================
 
     def compute_average_wait_time(self):
         """
@@ -292,13 +304,13 @@ class SyntheticCity:
             wait_times
         )
 
-    # ===================================================================
+    # ==================================================================
     # Snapshot
-    # ===================================================================
+    # ==================================================================
 
     def get_city_snapshot(self):
         """
-        Capture the current state of the mobility network.
+        Capture the current state of the city.
 
         The snapshot acts as a bridge between
         demand generation, collapse estimation,
@@ -310,6 +322,10 @@ class SyntheticCity:
             "graph":
 
             self.graph,
+
+            "zones":
+
+            self.zone_states,
 
             "zone_states":
 
@@ -325,4 +341,3 @@ class SyntheticCity:
 
         }
 ```
-
