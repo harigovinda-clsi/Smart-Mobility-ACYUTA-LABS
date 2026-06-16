@@ -156,5 +156,3 @@ class MobilityEquityEngine:
             collapse_risk["overall"]
 
         }
-```
-
