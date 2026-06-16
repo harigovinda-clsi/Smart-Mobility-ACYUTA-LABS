@@ -1,4 +1,3 @@
-```python
 """
 Multi-Agent Controller
 ===============================================================================
@@ -183,5 +182,3 @@ class MultiAgentController:
             )
 
         return actions
-```
-
