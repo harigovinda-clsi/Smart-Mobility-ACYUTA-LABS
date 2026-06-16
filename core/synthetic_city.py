@@ -21,7 +21,6 @@ are distinct but interacting components of urban systems.
 import networkx as nx
 import numpy as np
 
-
 class SyntheticCity:
     """
     Representation of a simplified metropolitan mobility network.
