@@ -1,4 +1,3 @@
-```python
 """
 Mobility Equity Heatmap
 --------------------------------------------------
@@ -175,5 +174,3 @@ def compute_city_fairness_score(mei_values):
 
         3
     )
-```
-
