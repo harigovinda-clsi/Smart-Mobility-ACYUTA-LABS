@@ -41,6 +41,7 @@ import datetime
 import time
 import sys
 import os
+import datetime
 
 # 1. Absolute path alignment
 current_dir = os.path.dirname(os.path.abspath(__file__))
@@ -148,33 +149,36 @@ if "simulation_history" not in st.session_state:
         "zone_states": []
     }
 
+# 1. Handle Timezone Offset Safely (IST is UTC + 5 hours 30 minutes)
+utc_now = datetime.datetime.now(datetime.timezone.utc)
+ist_offset = datetime.timedelta(hours=5, minutes=30)
+local_now = utc_now + ist_offset
+
+# 2. Pre-calculate the device minutes so it exists globally for both modes
+current_device_minutes = (local_now.hour * 60) + local_now.minute
+
 # ============================================================================
 # SIDEBAR: CONTROLS
 # ============================================================================
 
 st.sidebar.title("🎛️ Simulation Controls")
 
-# Let users choose between an automatic live clock or a manual override slider
 time_mode = st.sidebar.radio("Time Mode", ["Live Device Time", "Manual Override"])
 
 if time_mode == "Live Device Time":
-    now = datetime.datetime.now()
-    time_slider = (now.hour * 60) + now.minute
-    st.sidebar.info(f"⏰ Syncing live: {now.hour:02d}:{now.minute:02d}")
+    # Use the calculated local minutes directly
+    time_slider = current_device_minutes
+    st.sidebar.info(f"⏰ Syncing live (IST): {local_now.hour:02d}:{local_now.minute:02d}")
 else:
-    # Fallback manual slider if they want to experiment with different hours
+    # Now current_device_minutes is guaranteed to exist as a safe default integer!
     time_slider = st.sidebar.slider(
         "Simulation Time (Minutes from Start)",
-        0, 1439, 765, step=10,
+        min_value=0,
+        max_value=1439,
+        value=int(current_device_minutes), 
+        step=10,
         help="Advance through a full day (1440 mins)."
     )
-
-# Time control
-time_slider = st.sidebar.slider(
-    "Simulation Time (Minutes from Start)",
-    0, 1439, int(current_device_minutes), step=10,
-    help="Advance through a full day (1440 mins). Defaults to your device clock."
-)
 
 # Weather selection
 weather = st.sidebar.selectbox(
