@@ -1,0 +1,134 @@
+{
+    "city_name": "OneJourney Synthetic Metropolitan Region",
+
+    "description": "A simplified 12-zone urban mobility network representing the interaction between metro stations, bus corridors, residential regions, commercial districts, and peripheral communities. The objective is not to replicate any specific city but to capture the structural imbalance commonly observed in Indian metropolitan mobility systems.",
+
+    "num_zones": 12,
+
+    "zone_labels": {
+        "0": "Central Business District",
+        "1": "North Metro Hub",
+        "2": "University and IT Cluster",
+        "3": "Commercial Market Zone",
+        "4": "Residential Sector East",
+        "5": "Bus Interchange Corridor",
+        "6": "Mixed Residential Region",
+        "7": "South Metro Hub",
+        "8": "Peripheral Zone Alpha",
+        "9": "Peripheral Zone Beta",
+        "10": "Industrial and Logistics Area",
+        "11": "Low-Density Outer Region"
+    },
+
+    "metro_hubs": [
+        1,
+        7
+    ],
+
+    "bus_hubs": [
+        3,
+        5,
+        10
+    ],
+
+    "commercial_zones": [
+        0,
+        2,
+        3
+    ],
+
+    "residential_zones": [
+        4,
+        6
+    ],
+
+    "peripheral_zones": [
+        8,
+        9,
+        11
+    ],
+
+    "high_demand_regions": [
+        0,
+        1,
+        2,
+        3,
+        7
+    ],
+
+    "low_connectivity_regions": [
+        8,
+        9,
+        11
+    ],
+
+    "initial_scooter_distribution": {
+        "0": 80,
+        "1": 95,
+        "2": 70,
+        "3": 65,
+        "4": 55,
+        "5": 60,
+        "6": 45,
+        "7": 90,
+        "8": 30,
+        "9": 25,
+        "10": 40,
+        "11": 20
+    },
+
+    "base_wait_time_minutes": {
+        "0": 4,
+        "1": 3,
+        "2": 5,
+        "3": 5,
+        "4": 6,
+        "5": 5,
+        "6": 7,
+        "7": 3,
+        "8": 10,
+        "9": 11,
+        "10": 8,
+        "11": 12
+    },
+
+    "transit_edges": [
+        [0,1],
+        [0,2],
+        [1,3],
+        [2,3],
+        [3,5],
+        [5,7],
+        [4,6],
+        [6,7],
+        [7,10],
+        [8,5],
+        [9,6],
+        [10,11],
+        [8,9]
+    ],
+
+    "simulation_assumptions": {
+        "peak_hours": [
+            "08:00-10:00",
+            "17:00-20:00"
+        ],
+
+        "weather_events": [
+            "Sunny",
+            "Rain",
+            "Heavy Rain"
+        ],
+
+        "special_events": [
+            "Festival",
+            "Concert",
+            "Accident",
+            "Normal Day"
+        ],
+
+        "prediction_horizon_minutes": 15
+    },
+
+    "design_philosophy": "The synthetic city intentionally allocates fewer mobility resources to peripheral zones to reproduce the access asymmetry frequently observed in rapidly growing Indian cities. The objective of the OneJourney AI framework is not merely to maximize fleet utilization, but to proactively reduce emerging mobility inequality before fragmentation occurs."
+}
