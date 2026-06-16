@@ -39,6 +39,22 @@ import plotly.graph_objects as go
 import plotly.express as px
 from datetime import datetime, timedelta
 import time
+import sys
+import os
+
+# 1. Absolute path alignment
+current_dir = os.path.dirname(os.path.abspath(__file__))
+if current_dir not in sys.path:
+    sys.path.append(current_dir)
+
+# 2. Safely catching the import/parsing failure
+try:
+    from core.synthetic_city import SyntheticCity
+    from core.demand_generator import DemandGenerator
+except Exception as e:
+    st.error("🚨 Failed to import custom modules!")
+    st.exception(e)
+    st.stop() # Stops execution so we can read the error cleanly
 
 # Import custom modules
 from core.synthetic_city import SyntheticCity
