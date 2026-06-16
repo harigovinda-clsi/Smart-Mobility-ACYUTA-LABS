@@ -36,13 +36,14 @@ def generate_demand(
         weather_condition="Sunny",
         event_type="None",
         metro_frequency="Medium"):
-"""
-Generate a synthetic snapshot representing the current state 
-of urban mobility demand. 
+     
+        """
+        Generate a synthetic snapshot representing the current state 
+        of urban mobility demand. 
 
-The resulting structure serves as the input layer for collapse 
-estimation, equity analysis, and decentralized intervention.
-"""
+        The resulting structure serves as the input layer for collapse 
+        estimation, equity analysis, and decentralized intervention.
+        """
 
         
         hour = (time_minutes // 60) % 24
