@@ -151,5 +151,3 @@ def render_network_graph(city_graph,
     )
 
     return fig
-```
-
