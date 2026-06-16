@@ -194,37 +194,70 @@ demand_state = st.session_state.demand_gen.generate_demand(
 )
 
 # Predict collapse risk
-collapse_risk = st.session_state.collapse_predictor.predict_risk(
-    demand_state=demand_state,
-    city_state=st.session_state.city.zone_states,
-    weather_condition=weather
+city_snapshot = (
+    st.session_state.city
+    .get_city_snapshot()
+)
+
+collapse_risk = (
+    st.session_state.collapse_predictor
+    .evaluate_network(
+        demand_state,
+        city_snapshot
+    )
 )
 
 # Compute mobility equity
-equity_metrics = st.session_state.equity_engine.compute_equity_metrics(
-    demand_state=demand_state,
-    zone_states=st.session_state.city.zone_states
+equity_metrics = (
+    st.session_state.equity_engine
+    .evaluate_network(
+        demand_state,
+        city_snapshot,
+        collapse_risk
+    )
 )
 
 # Agent decisions
-agent_actions = st.session_state.agent_controller.step(
-    demand_state=demand_state,
-    collapse_risk=collapse_risk,
-    equity_metrics=equity_metrics
+agent_actions = (
+    st.session_state.agent_controller
+    .evaluate_network(
+        demand_state,
+        city_snapshot,
+        collapse_risk,
+        equity_metrics
+    )
 )
 
 # Update city state
-st.session_state.city.update_state(
-    agent_actions=agent_actions,
-    demand_state=demand_state
+# Update city state
+st.session_state.city.update_city(
+
+    demand_state
+
+)
+st.session_state.simulation_history["timestamp"].append(
+
+    time_slider
+
 )
 
+st.session_state.simulation_history["collapse_risk"].append(
+
+    collapse_risk["overall"]
+
+)
 # Store in history
-st.session_state.simulation_history["timestamp"].append(time_slider)
-st.session_state.simulation_history["collapse_risk"].append(collapse_risk["overall"])
-st.session_state.simulation_history["avg_wait"].append(equity_metrics["avg_wait_time"])
-st.session_state.simulation_history["equity_score"].append(equity_metrics["gini_equity"])
-st.session_state.simulation_history["fleet_util"].append(st.session_state.city.fleet_utilization)
+st.session_state.simulation_history["avg_wait"].append(
+    equity_metrics["average_wait_time"]
+)
+
+st.session_state.simulation_history["equity_score"].append(
+    equity_metrics["fairness_score"]
+)
+
+st.session_state.simulation_history["fleet_util"].append(
+    st.session_state.city.compute_fleet_utilization()
+)
 
 # ============================================================================
 # TOP METRICS ROW
@@ -235,7 +268,6 @@ st.markdown("---")
 metric_cols = st.columns(4)
 
 with metric_cols[0]:
-    risk_color = "🔴" if collapse_risk["overall"] > 0.7 else "🟡" if collapse_risk["overall"] > 0.4 else "🟢"
     st.metric(
         "Collapse Risk",
         f"{collapse_risk['overall']:.2f}",
@@ -246,23 +278,30 @@ with metric_cols[0]:
 with metric_cols[1]:
     st.metric(
         "Avg Wait Time",
-        f"{equity_metrics['avg_wait_time']:.1f} min",
-        delta=f"-{max(0, equity_metrics['avg_wait_time'] - 8):.1f} min" if equity_metrics['avg_wait_time'] < 8 else None
+        f"{equity_metrics['average_wait_time']:.1f} min",
+        delta=f"-{max(0, equity_metrics['average_wait_time'] - 8):.1f} min"
+if equity_metrics['average_wait_time'] < 8 else None
     )
 
 with metric_cols[2]:
     st.metric(
         "Equity Score (Gini)",
-        f"{equity_metrics['gini_equity']:.3f}",
-        delta="↑ Fair" if equity_metrics['gini_equity'] > 0.8 else "⚠ Unequal"
+        f"{equity_metrics['fairness_score']:.3f}",
+        delta=
+        "↑ Fair"
+        if equity_metrics['fairness_score'] > 0.8
+        else "⚠ Unequal"
     )
 
 with metric_cols[3]:
     st.metric(
-        "Fleet Utilization",
-        f"{st.session_state.city.fleet_utilization:.1f}%",
-        delta=f"+{st.session_state.city.fleet_utilization - 50:.1f}%" if st.session_state.city.fleet_utilization > 50 else None
-    )
+    "Fleet Utilization",
+    f"{st.session_state.city.compute_fleet_utilization():.1f}%",
+    delta=
+    f"+{st.session_state.city.compute_fleet_utilization()-50:.1f}%"
+    if st.session_state.city.compute_fleet_utilization() > 50
+    else None
+)
 
 st.markdown("---")
 
@@ -290,9 +329,9 @@ with tab1:
     )
     
     fig_network = render_network_graph(
-        city=st.session_state.city,
-        collapse_risk=collapse_risk,
-        demand_state=demand_state
+    st.session_state.city.graph,
+    demand_state,
+    collapse_risk
     )
     st.plotly_chart(fig_network, use_container_width=True, key="network_plot")
     
@@ -300,12 +339,32 @@ with tab1:
     st.subheader("Zone Status Details")
     zone_df = pd.DataFrame({
         "Zone": [f"Zone {i+1}" for i in range(st.session_state.city.num_zones)],
-        "Demand (rides/min)": [d['intensity'] for d in demand_state["zones"]],
-        "Available Scooters": [z['scooters'] for z in st.session_state.city.zone_states],
-        "Avg Wait (min)": [z['avg_wait'] for z in st.session_state.city.zone_states],
-        "Risk Level": ["🔴 High" if collapse_risk["by_zone"][i] > 0.7 else "🟡 Medium" if collapse_risk["by_zone"][i] > 0.4 else "🟢 Low" for i in range(st.session_state.city.num_zones)]
-    })
-    st.dataframe(zone_df, use_container_width=True, hide_index=True)
+        "Demand (rides/min)": [d.intensity for d in demand_state["zones"]],
+        "Available Scooters": [
+    st.session_state.city.zone_states[i]["availability"]
+    for i in range(st.session_state.city.num_zones)
+    ],
+        "Avg Wait (min)": [
+    st.session_state.city.zone_states[i]["waiting_time"]
+    for i in range(st.session_state.city.num_zones)
+    ],
+        "Risk Level": [
+    "🔴 High"
+    if collapse_risk["by_zone"][i] > 0.7
+    else "🟡 Medium"
+    if collapse_risk["by_zone"][i] > 0.4
+    else "🟢 Low"
+    for i in range(
+        st.session_state.city.num_zones
+    )
+]
+})
+
+st.dataframe(
+    zone_df,
+    use_container_width=True,
+    hide_index=True
+)
 
 # ─────────────────────────────────────────────────────────────────────────
 # TAB 2: DEMAND FLOW FIELD
@@ -319,7 +378,12 @@ with tab2:
     )
     
     # Demand coherence per zone
-    coherence_values = [demand_state["zones"][i].get("coherence", 0.5) for i in range(st.session_state.city.num_zones)]
+    coherence_values = [
+    demand_state["zones"][i].coherence
+    for i in range(
+        st.session_state.city.num_zones
+    )
+]
     
     fig_flow = go.Figure()
     fig_flow.add_trace(go.Bar(
@@ -358,18 +422,39 @@ with tab3:
     )
     
     fig_equity = render_equity_heatmap(
-        city=st.session_state.city,
-        demand_state=demand_state,
-        equity_metrics=equity_metrics
-    )
+
+    equity_metrics["zone_mei"]
+
+)
     st.plotly_chart(fig_equity, use_container_width=True)
     
     # Zone fairness rankings
     st.subheader("Zone Fairness Rankings")
     mei_values = [
-        (st.session_state.city.zone_states[i]['scooters'] / max(demand_state["zones"][i]['intensity'], 1))
-        for i in range(st.session_state.city.num_zones)
-    ]
+
+    (
+
+        st.session_state.city.zone_states[i]["availability"]
+
+        /
+
+        max(
+
+            demand_state["zones"][i].intensity,
+
+            1
+
+        )
+
+    )
+
+    for i in range(
+
+        st.session_state.city.num_zones
+
+    )
+
+]
     
     zone_fairness = pd.DataFrame({
         "Rank": range(1, st.session_state.city.num_zones + 1),
