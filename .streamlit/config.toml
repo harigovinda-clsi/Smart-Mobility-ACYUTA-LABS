@@ -1,6 +1,19 @@
+# =========================================================================
+# Theme : Digital Twin Command Center
+#
+# Cities are living systems.
+# The dashboard attempts to resemble a control room from which
+# mobility patterns, collapse risks, and interventions can be
+# observed in real time.
+#
+# Inspired by:
+# Smart city command centers and digital twins.
+# =========================================================================
+
 [theme]
-primaryColor="#247ba0"
-backgroundColor="#ffffff"
-secondaryBackgroundColor="#f5f5f5"
-textColor="#0a2463"
-font="sans serif"
+
+primaryColor = "#00B4D8"
+backgroundColor = "#081C24"
+secondaryBackgroundColor = "#102A43"
+textColor = "#F8FAFC"
+font = "sans serif"
