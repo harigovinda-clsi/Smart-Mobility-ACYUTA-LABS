@@ -41,7 +41,6 @@ def generate_demand(
 Generate a synthetic snapshot representing the current state of urban mobility demand. The resulting structure 
 serves as the input layer for collapse estimation, equity analysis, and decentralized intervention.
 """
-```
 
         
         hour = (time_minutes // 60) % 24
