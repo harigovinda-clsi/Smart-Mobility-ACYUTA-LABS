@@ -154,9 +154,20 @@ if "simulation_history" not in st.session_state:
 
 st.sidebar.title("🎛️ Simulation Controls")
 
-# Dynamic clock alignment with local machine time
-now = datetime.datetime.now()
-current_device_minutes = (now.hour * 60) + now.minute
+# Let users choose between an automatic live clock or a manual override slider
+time_mode = st.sidebar.radio("Time Mode", ["Live Device Time", "Manual Override"])
+
+if time_mode == "Live Device Time":
+    now = datetime.datetime.now()
+    time_slider = (now.hour * 60) + now.minute
+    st.sidebar.info(f"⏰ Syncing live: {now.hour:02d}:{now.minute:02d}")
+else:
+    # Fallback manual slider if they want to experiment with different hours
+    time_slider = st.sidebar.slider(
+        "Simulation Time (Minutes from Start)",
+        0, 1439, 765, step=10,
+        help="Advance through a full day (1440 mins)."
+    )
 
 # Time control
 time_slider = st.sidebar.slider(
