@@ -31,7 +31,17 @@ class DemandGenerator:
         return midday + morning_peak + evening_peak
     
     def generate_demand(self, time_minutes=0, weather_condition="Sunny", event_type="None", metro_frequency="Medium"):
-        """Generate demand state for current simulation time"""
+        ```python
+"""
+Generate a synthetic snapshot representing the
+current state of urban mobility demand.
+
+The resulting structure serves as the input layer
+for collapse estimation, equity analysis,
+and decentralized intervention.
+"""
+```
+
         
         hour = (time_minutes // 60) % 24
         minute = time_minutes % 60
