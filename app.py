@@ -1,19 +1,39 @@
+```python
 """
-OneJourney AI: Predictive Mobility Equity Framework
-================================================================================
-A decentralized multi-agent system for fair & efficient last-mile scooter distribution
-in urban transit networks.
+OneJourney AI
+===============================================================================
 
-ATTRIBUTION:
-- Architected on AquaEdgeAI (Shreyas Mishra & Vaibhav Bhadoriya, JDIPR May 2025)
-  Adapted from: Decentralized MARL water allocation → scooter fleet rebalancing
-- Equity framework grounded in: Digital Credit Paradox research (Arbitrage, Feb 2026)
-  Core finding: Distribution velocity >> equity enforcement requires hard constraints
+Cities are dynamic systems rather than isolated transportation assets.
 
-HACKATHON MVP MODE: Optimized for visual impact, real-time interactivity, 3-min demo
+OneJourney AI explores whether the decentralized predictive philosophy
+previously investigated in crowd safety and resource allocation can be
+adapted to urban mobility.
 
-================================================================================
+Instead of reacting to shortages after they occur, the framework attempts
+to identify emerging accessibility imbalances before fragmentation becomes
+visible to commuters.
+
+The current implementation represents a simulation environment built around:
+
+    Demand Flow Field
+    +
+    Collapse Risk Estimation
+    +
+    Mobility Equity Index
+    +
+    Decentralized Agent Coordination
+
+The objective is not merely to maximize fleet utilization, but to study
+how efficiency, accessibility, and resilience interact across the network.
+
+Inspired by previously validated decentralized frameworks, the adaptation
+to shared mobility remains exploratory and serves as a proof-of-concept
+for future investigation.
+
+===============================================================================
 """
+```
+"
 
 import streamlit as st
 import pandas as pd
@@ -437,16 +457,36 @@ with tab5:
 # FOOTER
 # ============================================================================
 
+```python
 st.markdown("---")
+
 st.markdown(
     """
-    <div style="text-align: center; color: #666; font-size: 0.85rem;">
-    <strong>OneJourney AI MVP</strong> | Decentralized MARL for Urban Mobility Equity  
-    Hackathon Submission • Architecture: AquaEdgeAI adapted for last-mile scooter distribution  
-    <a href="https://github.com/yourusername/onejourney-ai" target="_blank">GitHub</a> | 
-    <a href="#" target="_blank">Demo Video (3 min)</a>
+    <div style="
+        text-align:center;
+        color:#6B7280;
+        font-size:0.88rem;
+        line-height:1.7;
+    ">
+
+    <strong>OneJourney AI</strong><br>
+
+    Predictive Last-Mile Intelligence Framework<br><br>
+
+    Exploring interactions between efficiency,
+    accessibility, and resilience in urban mobility systems.<br><br>
+
+    Current implementation represents an exploratory
+    simulation environment.<br>
+
+    Validation for real-world deployment remains future work.<br><br>
+
+    <strong>ACYUTA LABS</strong><br>
+
+    SRMIST Urban Mobility Challenge 2026
+
     </div>
     """,
     unsafe_allow_html=True
 )
-
+```
