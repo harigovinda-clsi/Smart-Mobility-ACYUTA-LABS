@@ -1,4 +1,3 @@
-```python
 """
 Metrics Panel
 --------------------------------------------------
@@ -211,4 +210,3 @@ def render_time_banner(
 
         f"Simulation Time : {simulation_hour}:00"
     )
-```
