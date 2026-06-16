@@ -1,4 +1,3 @@
-```python
 """
 Network Visualization Module
 --------------------------------------------------
