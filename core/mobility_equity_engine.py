@@ -29,130 +29,52 @@ local demand.
 
 import numpy as np
 
-
 class MobilityEquityEngine:
-    """
-    Quantify accessibility and equity across zones.
-    """
-
     def __init__(self):
-
         pass
 
-    # ==============================================================
-    # Mobility Equity Index
-    # ==============================================================
+    def _calculate_gini(self, allocations):
+        """Computes the Gini Coefficient for a list of resource allocations."""
+        n = len(allocations)
+        if n == 0:
+            return 0.0
+        
+        allocations = np.array(allocations, dtype=np.float64)
+        mean_val = np.mean(allocations)
+        
+        if mean_val == 0:
+            return 0.0  # Safe fallback if there are no resources anywhere
+        
+        # Efficient vectorized calculation of absolute differences
+        abs_diffs = np.abs(allocations[:, None] - allocations)
+        gini = np.sum(abs_diffs) / (2 * (n ** 2) * mean_val)
+        return float(gini)
 
-    def compute_mei(
-            self,
-            availability,
-            demand):
+    def evaluate_network(self, demand_state, city_snapshot):
         """
-        Compute local accessibility.
-
-        Higher values imply better alignment
-        between resources and demand.
+        Evaluates real-time fairness based on current zone demand vs available scooters.
         """
-
-        demand = max(
-
-            demand,
-            0.1
-        )
-
-        return availability / demand
-
-    # ==============================================================
-    # Zone-wise MEI
-    # ==============================================================
-
-    def evaluate_network(
-            self,
-            demand_state,
-            city_snapshot,
-            collapse_risk):
-        """
-        Estimate accessibility across the city.
-        """
-
-        zone_states = city_snapshot["zones"]
-
-        mei_values = []
-
-        underserved_zones = []
-
-        for zone_demand in demand_state["zones"]:
-
-            zone_id = zone_demand.zone_id
-
-            availability = zone_states[zone_id][
-
-                "availability"
-
-            ]
-
-            demand = zone_demand.intensity
-
-            mei = self.compute_mei(
-
-                availability,
-
-                demand
-
-            )
-
-            mei_values.append(
-
-                mei
-            )
-
-            if mei < 3:
-
-                underserved_zones.append(
-
-                    zone_id
-                )
-
-        variance_mei = np.var(
-
-            mei_values
-        )
-
-        fairness_score = 1 / (
-
-            1 + variance_mei
-        )
-
-        average_wait_time = city_snapshot[
-
-            "average_wait_time"
-
-        ]
-
+        zone_equity_metrics = []
+        
+        # Iterate over matching zones to determine service fulfillment ratios
+        for zone_id, zone_data in city_snapshot.items():
+            # Extract real-world demand dynamically, avoiding zero division
+            demand = max(demand_state.get(zone_id, {}).get('demand', 1.0), 0.1)
+            available = zone_data.get('available_scooters', 0)
+            
+            # Metric: How well is the supply meeting the localized demand?
+            fulfillment_ratio = available / demand
+            zone_equity_metrics.append(fulfillment_ratio)
+            
+        # Calculate Gini Index (0 = perfect equality, 1 = maximum inequality)
+        gini_index = self._calculate_gini(zone_equity_metrics)
+        
+        # Convert to an Equity/Fairness Score sitting realistically between 0.0 and 1.0
+        # A higher score implies high systemic fairness across the network
+        fairness_score = max(0.0, min(1.0, 1.0 - gini_index))
+        
         return {
-
-            "zone_mei":
-
-            mei_values,
-
-            "variance":
-
-            variance_mei,
-
-            "fairness_score":
-
-            fairness_score,
-
-            "average_wait_time":
-
-            average_wait_time,
-
-            "underserved_zones":
-
-            underserved_zones,
-
-            "collapse_risk":
-
-            collapse_risk["overall"]
-
+            "equity_score": round(fairness_score, 3),
+            "gini_index": round(gini_index, 3),
+            "zone_metrics": zone_equity_metrics
         }
